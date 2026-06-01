@@ -1,0 +1,123 @@
+Replace postgres:password with your actual PostgreSQL username and password.
+vite google id 
+-----
+PS C:\Users\vatti\Desktop\taskmanager> cd backend
+PS C:\Users\vatti\Desktop\taskmanager\backend> python -m venv venv
+PS C:\Users\vatti\Desktop\taskmanager\backend> 
+-----------for frontend to run 
+ 
+PS C:\Users\vatti\Desktop\taskmanager> cd frontend
+PS C:\Users\vatti\Desktop\taskmanager\frontend> npm install
+
+added 70 packages, and audited 71 packages in 22s
+
+7 packages are looking for funding
+  run `npm fund` for details
+
+2 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+PS C:\Users\vatti\Desktop\taskmanager\frontend> npm run dev
+
+> taskmanager-frontend@1.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 863 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+
+------------------
+Created 3 todos
+
+**Quick plan:** I'll list the exact commands (PowerShell) to set up/run the project, explain DB requirements, and add Git/GitHub push commands.
+
+- **Setup (once per machine)**:
+  - Backend: 
+    - cd into project and create venv, install deps:
+      - cd C:\Users\vatti\Desktop\taskmanager\backend
+      - python -m venv venv
+      - .\venv\Scripts\Activate.ps1
+      - pip install -r requirements.txt
+  - Frontend:
+    - cd C:\Users\vatti\Desktop\taskmanager\frontend
+    - npm install
+
+- **Start database (required before backend)**:
+  - Option A — Use local Postgres service (if installed): start the service via Services UI or (example):
+    - Start-Service postgresql   (service name may vary)
+  - Option B — Quick Docker Postgres (recommended if you don't want to install):
+    - docker run --name task-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres123 -e POSTGRES_DB=taskmanager -p 5432:5432 -d postgres:15
+  - (If DB created by you is missing) create DB:
+    - psql -U postgres -h localhost -c "CREATE DATABASE taskmanager;"
+    - or if using Docker: docker exec -it task-pg psql -U postgres -c "CREATE DATABASE taskmanager;"
+
+- **Run backend (every time)**:
+  - Open PowerShell in backend and activate venv:
+    - cd C:\Users\vatti\Desktop\taskmanager\backend
+    - .\venv\Scripts\Activate.ps1
+  - Ensure `.env` is present (you showed one already). Then:
+    - python app.py
+  - (Notes)
+    - The project auto-creates tables (`db.create_all()`), so migrations are optional.
+    - If you prefer migrations:
+      - $env:FLASK_APP = "app:create_app()"
+      - $env:FLASK_ENV = "development"
+      - flask db init
+      - flask db migrate -m "init"
+      - flask db upgrade
+
+- **Run frontend (every time)**:
+  - Open PowerShell in frontend:
+    - cd C:\Users\vatti\Desktop\taskmanager\frontend
+    - npm run dev
+  - Frontend should be at http://localhost:5173 by default.
+
+- **Should the DB always be "open"/running?**
+  - Yes — the backend requires a running PostgreSQL server reachable at `DATABASE_URL` from `.env` (your `.env` points to localhost:5432). You must either:
+    - Start your local Postgres service, OR
+    - Run Postgres in Docker before starting the backend.
+  - If you use an alternate DB (remote), update `DATABASE_URL` accordingly.
+
+- **Git / push to GitHub (one-time for repo)**
+  - If repo is not initialized and you want to push:
+    - cd C:\Users\vatti\Desktop\taskmanager
+    - git init
+    - git add .
+    - git commit -m "Initial commit"
+    - git branch -M main
+    - git remote add origin git@github.com:<YOUR_USERNAME>/<REPO>.git
+    - git push -u origin main
+  - If you prefer HTTPS:
+    - git remote add origin https://github.com/<YOUR_USERNAME>/<REPO>.git
+    - git push -u origin main
+  - Create repo via GitHub CLI (optional):
+    - gh repo create <YOUR_USERNAME>/<REPO> --public --source=. --remote=origin --push
+  - Regular update workflow:
+    - git add -A
+    - git commit -m "Describe changes"
+    - git push
+
+- **Quick copyable PowerShell snippet (run each dev session)**:
+  - Backend:
+    ```powershell
+    cd C:\Users\vatti\Desktop\taskmanager\backend
+    .\venv\Scripts\Activate.ps1
+    python app.py
+    ```
+  - Frontend (separate terminal):
+    ```powershell
+    cd C:\Users\vatti\Desktop\taskmanager\frontend
+    npm run dev
+    ```
+  - Start DB with Docker (if needed, once per machine or per session):
+    ```powershell
+    docker run --name task-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres123 -e POSTGRES_DB=taskmanager -p 5432:5432 -d postgres:15
+    ```
+
